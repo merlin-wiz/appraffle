@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Sell Raffle Tickets</title>
 <link rel="manifest" href="/seller/manifest.json">
 <meta name="theme-color" content="#0f172a">
@@ -25,7 +25,7 @@
     <!-- SELL: quantity picker -->
     <section id="sell" class="screen hidden">
       <div class="topbar">
-        <span id="sellerLabel"></span>
+        <button id="sellerLabel" class="seller-btn"></button>
         <span id="remaining" class="pill">-- left</span>
       </div>
       <h1>How many tickets?</h1>
@@ -34,10 +34,27 @@
         <div id="qtyValue">1</div>
         <button id="qtyPlus" class="qty-btn">&plus;</button>
       </div>
+      <div class="qty-bulk-row">
+        <button class="qty-bulk-btn" data-delta="-10">&minus;10</button>
+        <button class="qty-bulk-btn" data-delta="-5">&minus;5</button>
+        <button class="qty-bulk-btn" data-delta="5">+5</button>
+        <button class="qty-bulk-btn" data-delta="10">+10</button>
+      </div>
       <div id="priceLine" class="price-line"></div>
       <button id="sellBtn" class="primary">Sell &mdash; show QR</button>
       <div id="recentSales"></div>
     </section>
+
+    <!-- Change seller modal -->
+    <div id="sellerModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <h2>Change seller</h2>
+        <p class="sub">Enter the name of who's selling on this phone now.</p>
+        <input id="sellerModalInput" type="text" autocomplete="name" />
+        <button id="sellerModalSave" class="primary">Save</button>
+        <button id="sellerModalCancel" class="secondary">Cancel</button>
+      </div>
+    </div>
 
     <!-- QR: buyer scans this -->
     <section id="qr" class="screen hidden">

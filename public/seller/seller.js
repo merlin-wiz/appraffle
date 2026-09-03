@@ -39,6 +39,30 @@
     refreshRemaining();
   }
 
+  // --- change seller (tap the name top-left) ---
+  $('sellerLabel').addEventListener('click', () => {
+    $('sellerModalInput').value = sellerName;
+    $('sellerModal').classList.remove('hidden');
+    setTimeout(() => $('sellerModalInput').focus(), 50);
+  });
+  $('sellerModalCancel').addEventListener('click', () => {
+    $('sellerModal').classList.add('hidden');
+  });
+  $('sellerModalSave').addEventListener('click', () => {
+    const newName = $('sellerModalInput').value.trim();
+    if (!newName) return;
+    if (newName !== sellerName) {
+      // Treat this as a different person selling on this phone: give them
+      // their own seller ID so admin stats attribute sales correctly.
+      sellerId = 'seller_' + Math.random().toString(36).slice(2, 10);
+      sellerName = newName;
+      localStorage.setItem('sellerId', sellerId);
+      localStorage.setItem('sellerName', sellerName);
+      $('sellerLabel').textContent = sellerName;
+    }
+    $('sellerModal').classList.add('hidden');
+  });
+
   // --- quantity picker ---
   let qty = 1;
   const TICKET_PRICE = window.__TICKET_PRICE_MINOR__ || null; // set below via fetch
@@ -47,6 +71,13 @@
   }
   $('qtyMinus').addEventListener('click', () => { if (qty > 1) qty--; renderQty(); });
   $('qtyPlus').addEventListener('click', () => { if (qty < 500) qty++; renderQty(); });
+  document.querySelectorAll('.qty-bulk-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const delta = parseInt(btn.dataset.delta, 10);
+      qty = Math.min(500, Math.max(1, qty + delta));
+      renderQty();
+    });
+  });
   renderQty();
 
   async function refreshRemaining() {

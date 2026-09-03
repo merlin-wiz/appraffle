@@ -37,6 +37,17 @@ router.get('/stats', (req, res) => {
   });
 });
 
+router.get('/orders', (req, res) => {
+  const orders = db.prepare(`
+    SELECT o.id, o.quantity, o.ticket_start, o.ticket_end, o.amount_minor,
+           o.buyer_name, o.buyer_email, o.buyer_phone, o.paid_at, s.name AS seller_name
+    FROM orders o JOIN sellers s ON s.id = o.seller_id
+    WHERE o.status = 'paid'
+    ORDER BY o.paid_at DESC
+  `).all();
+  res.json(orders);
+});
+
 router.get('/prizes', (req, res) => {
   res.json(db.prepare('SELECT * FROM prizes ORDER BY rank ASC').all());
 });

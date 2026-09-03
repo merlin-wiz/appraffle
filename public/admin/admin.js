@@ -24,7 +24,7 @@
       $('login').classList.add('hidden');
       $('dashboard').classList.remove('hidden');
       loadAll();
-      setInterval(loadStats, 5000);
+      setInterval(loadAll, 5000);
     } catch (e) {
       $('loginError').textContent = 'Incorrect password.';
     }
@@ -49,6 +49,17 @@
     $('pending').textContent = s.pendingOrders;
     $('sellerTable').querySelector('tbody').innerHTML = s.bySeller
       .map((r) => `<tr><td>${r.seller}</td><td>${r.orders}</td><td>${r.tickets}</td><td>${money(r.revenue)}</td></tr>`)
+      .join('');
+  }
+
+  async function loadOrders() {
+    const orders = await api('/orders');
+    $('salesTable').querySelector('tbody').innerHTML = orders
+      .map((o) => {
+        const time = new Date(o.paid_at + 'Z').toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
+        const tickets = `#${o.ticket_start}${o.ticket_end !== o.ticket_start ? '-' + o.ticket_end : ''}`;
+        return `<tr><td>${time}</td><td>${o.seller_name}</td><td>${tickets}</td><td>${o.buyer_name || '-'}</td><td>${o.buyer_phone || '-'}</td><td>${o.buyer_email || '-'}</td><td>${money(o.amount_minor)}</td></tr>`;
+      })
       .join('');
   }
 
@@ -98,6 +109,7 @@
 
   function loadAll() {
     loadStats();
+    loadOrders();
     loadPrizes();
     loadWinners();
   }

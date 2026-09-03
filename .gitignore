@@ -1,0 +1,5 @@
+node_modules/
+.env
+raffle.db
+raffle.db-shm
+raffle.db-wal

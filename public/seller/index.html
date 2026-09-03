@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Sell Raffle Tickets</title>
+<link rel="manifest" href="/seller/manifest.json">
+<meta name="theme-color" content="#0f172a">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="/seller/style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- SETUP: seller enters their name once, stored on this phone -->
+    <section id="setup" class="screen">
+      <h1>Raffle Seller</h1>
+      <p class="sub">Enter your name to start selling.</p>
+      <input id="sellerName" type="text" placeholder="Your name" autocomplete="name" />
+      <button id="startBtn">Start selling</button>
+    </section>
+
+    <!-- SELL: quantity picker -->
+    <section id="sell" class="screen hidden">
+      <div class="topbar">
+        <span id="sellerLabel"></span>
+        <span id="remaining" class="pill">-- left</span>
+      </div>
+      <h1>How many tickets?</h1>
+      <div class="qty-picker">
+        <button id="qtyMinus" class="qty-btn">&minus;</button>
+        <div id="qtyValue">1</div>
+        <button id="qtyPlus" class="qty-btn">&plus;</button>
+      </div>
+      <div id="priceLine" class="price-line"></div>
+      <button id="sellBtn" class="primary">Sell &mdash; show QR</button>
+      <div id="recentSales"></div>
+    </section>
+
+    <!-- QR: buyer scans this -->
+    <section id="qr" class="screen hidden">
+      <h1>Ask buyer to scan</h1>
+      <div class="qr-wrap">
+        <img id="qrImage" alt="QR code to pay" />
+        <div id="qrTimer" class="qr-timer">5:00</div>
+      </div>
+      <p class="qr-summary" id="qrSummary"></p>
+      <p id="qrStatus" class="status pending">Waiting for payment&hellip;</p>
+      <button id="cancelBtn" class="secondary">Cancel this sale</button>
+    </section>
+
+    <!-- RESULT -->
+    <section id="result" class="screen hidden">
+      <div id="resultIcon" class="result-icon"></div>
+      <h1 id="resultTitle"></h1>
+      <p id="resultDetail"></p>
+      <button id="newSaleBtn" class="primary">Sell more tickets</button>
+    </section>
+
+  </div>
+  <script src="/seller/seller.js"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raffle Admin</title>
+<link rel="stylesheet" href="/admin/style.css">
+</head>
+<body>
+<div id="app">
+
+  <section id="login" class="card">
+    <h1>Raffle Admin</h1>
+    <input id="password" type="password" placeholder="Admin password" />
+    <button id="loginBtn">Enter</button>
+    <p id="loginError" class="error"></p>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <h1>Raffle Admin</h1>
+
+    <div class="stats-grid">
+      <div class="stat"><div class="num" id="ticketsSold">-</div><div class="label">Tickets sold</div></div>
+      <div class="stat"><div class="num" id="ticketsRemaining">-</div><div class="label">Remaining</div></div>
+      <div class="stat"><div class="num" id="revenue">-</div><div class="label">Revenue</div></div>
+      <div class="stat"><div class="num" id="pending">-</div><div class="label">Pending sales</div></div>
+    </div>
+
+    <h2>By seller</h2>
+    <table id="sellerTable"><thead><tr><th>Seller</th><th>Orders</th><th>Tickets</th><th>Revenue</th></tr></thead><tbody></tbody></table>
+
+    <h2>Prizes</h2>
+    <div class="prize-form">
+      <input id="prizeRank" type="number" min="1" placeholder="Rank (1 = top prize)" />
+      <input id="prizeName" type="text" placeholder="Prize name" />
+      <button id="addPrizeBtn">Add prize</button>
+    </div>
+    <table id="prizeTable"><thead><tr><th>Rank</th><th>Prize</th><th></th></tr></thead><tbody></tbody></table>
+
+    <h2>Draw</h2>
+    <button id="drawBtn" class="danger">Run the draw</button>
+    <p class="hint">This can only be run once. Winners are emailed automatically.</p>
+    <table id="winnerTable"><thead><tr><th>Prize</th><th>Ticket #</th><th>Winner</th><th>Email</th><th>Notified</th></tr></thead><tbody></tbody></table>
+  </section>
+
+</div>
+<script src="/admin/admin.js"></script>
+</body>
+</html>

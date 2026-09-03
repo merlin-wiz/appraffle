@@ -64,7 +64,7 @@
   });
 
   // --- quantity picker ---
-  let qty = 1;
+  let qty = 5;
   const TICKET_PRICE = window.__TICKET_PRICE_MINOR__ || null; // set below via fetch
   function renderQty() {
     $('qtyValue').textContent = qty;
@@ -186,7 +186,7 @@
   }
 
   $('newSaleBtn').addEventListener('click', () => {
-    qty = 1; renderQty();
+    qty = 5; renderQty();
     show('sell');
     refreshRemaining();
   });

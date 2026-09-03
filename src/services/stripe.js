@@ -20,6 +20,7 @@ const CURRENCY = process.env.CURRENCY || 'gbp';
 async function createCheckoutSession({ orderId, quantity, amountMinor, ticketStart, ticketEnd }) {
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
+managed_payments: { enabled: false },
     line_items: [
       {
         price_data: {

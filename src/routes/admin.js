@@ -1,6 +1,6 @@
 const express = require('express');
 const db = require('../db');
-const { runDraw } = require('../services/draw');
+const { runDraw, emailWinnerById, emailAllWinners } = require('../services/draw');
 const { remainingTickets } = require('../services/tickets');
 
 const router = express.Router();
@@ -59,6 +59,14 @@ router.post('/prizes', (req, res) => {
   res.json(db.prepare('SELECT * FROM prizes ORDER BY rank ASC').all());
 });
 
+router.put('/prizes/:id', (req, res) => {
+  const { name, rank } = req.body;
+  if (!name || !rank) return res.status(400).json({ error: 'name and rank are required' });
+  const result = db.prepare('UPDATE prizes SET name = ?, rank = ? WHERE id = ?').run(name, rank, req.params.id);
+  if (result.changes === 0) return res.status(404).json({ error: 'prize not found' });
+  res.json(db.prepare('SELECT * FROM prizes ORDER BY rank ASC').all());
+});
+
 router.delete('/prizes/:id', (req, res) => {
   db.prepare('DELETE FROM prizes WHERE id = ?').run(req.params.id);
   res.json(db.prepare('SELECT * FROM prizes ORDER BY rank ASC').all());
@@ -71,6 +79,37 @@ router.get('/winners', (req, res) => {
     ORDER BY p.rank ASC
   `).all();
   res.json(winners);
+});
+
+router.put('/winners/:id', (req, res) => {
+  const { ticket_number, prize_id, buyer_name, buyer_email, buyer_phone } = req.body;
+  const result = db.prepare(`
+    UPDATE winners SET ticket_number = ?, prize_id = ?, buyer_name = ?, buyer_email = ?, buyer_phone = ?
+    WHERE id = ?
+  `).run(ticket_number, prize_id, buyer_name, buyer_email, buyer_phone, req.params.id);
+  if (result.changes === 0) return res.status(404).json({ error: 'winner not found' });
+  res.json(db.prepare(`
+    SELECT w.*, p.name AS prize_name, p.rank AS prize_rank
+    FROM winners w JOIN prizes p ON p.id = w.prize_id ORDER BY p.rank ASC
+  `).all());
+});
+
+router.post('/winners/:id/email', async (req, res) => {
+  try {
+    const result = await emailWinnerById(req.params.id);
+    res.json({ result });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.post('/winners/email-all', async (req, res) => {
+  try {
+    const results = await emailAllWinners();
+    res.json({ results });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
 router.post('/draw', async (req, res) => {

@@ -17,8 +17,10 @@ function secureShuffle(array) {
 
 /**
  * Run the draw: one winning ticket per prize, highest rank (1st prize)
- * drawn first, no ticket can win twice. Persists winners and emails them.
- * Returns the list of winners.
+ * drawn first, no ticket can win twice. Persists winners but does NOT
+ * email them - the admin reviews and corrects details on the dashboard
+ * first, then triggers emails manually (see emailWinner / emailAllWinners
+ * below). Returns the list of winners.
  */
 async function runDraw() {
   const existing = db.prepare('SELECT COUNT(*) AS c FROM winners').get();
@@ -66,25 +68,52 @@ async function runDraw() {
     winners.push({ ...record, prizeName: prizes[i].name, prizeRank: prizes[i].rank });
   }
 
-  // notify winners (best-effort; failures are logged, not fatal)
-  const markNotified = db.prepare(
-    `UPDATE winners SET notified_at = datetime('now') WHERE order_id = ? AND ticket_number = ?`
-  );
-  for (const w of winners) {
-    try {
-      const result = await sendWinnerEmail({
-        to: w.buyer_email,
-        name: w.buyer_name,
-        prizeName: w.prizeName,
-        ticketNumber: w.ticket_number,
-      });
-      if (!result.skipped) markNotified.run(w.order_id, w.ticket_number);
-    } catch (err) {
-      console.error(`Failed to email winner of prize "${w.prizeName}":`, err.message);
-    }
-  }
-
   return winners;
 }
 
-module.exports = { runDraw };
+/**
+ * Email one winner (by their winners.id row) and mark them notified.
+ * Safe to call more than once - re-sending is treated as intentional
+ * (e.g. the admin corrected a typo'd email and wants to resend).
+ */
+async function emailWinnerById(winnerId) {
+  const w = db.prepare(`
+    SELECT w.*, p.name AS prize_name FROM winners w JOIN prizes p ON p.id = w.prize_id WHERE w.id = ?
+  `).get(winnerId);
+  if (!w) throw new Error('Winner not found');
+
+  const result = await sendWinnerEmail({
+    to: w.buyer_email,
+    name: w.buyer_name,
+    prizeName: w.prize_name,
+    ticketNumber: w.ticket_number,
+  });
+  if (!result.skipped) {
+    db.prepare(`UPDATE winners SET notified_at = datetime('now') WHERE id = ?`).run(winnerId);
+  }
+  return result;
+}
+
+/**
+ * Email every winner who hasn't been notified yet. Returns a per-winner
+ * result list so the admin can see if any failed (e.g. bad email address).
+ */
+async function emailAllWinners() {
+  const winners = db.prepare(`
+    SELECT w.*, p.name AS prize_name FROM winners w JOIN prizes p ON p.id = w.prize_id
+    WHERE w.notified_at IS NULL
+  `).all();
+
+  const results = [];
+  for (const w of winners) {
+    try {
+      const result = await emailWinnerById(w.id);
+      results.push({ winnerId: w.id, ok: !result.skipped, reason: result.reason });
+    } catch (err) {
+      results.push({ winnerId: w.id, ok: false, reason: err.message });
+    }
+  }
+  return results;
+}
+
+module.exports = { runDraw, emailWinnerById, emailAllWinners };
